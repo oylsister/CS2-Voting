@@ -11,12 +11,14 @@ namespace Voting
             _plugin = plugin; 
         }
 
-        public void CreateVote(string question, List<string> chioce)
+        public event Action? OnVoteEnd;
+
+        public void CreateVote(string question, List<string> chioce, int duration)
         {
             _plugin.Question = question;
             _plugin.Choice = chioce;
 
-            _plugin.VoteStart();
+            _plugin.VoteStart(duration);
         }
 
         public void CancelVote()
@@ -34,6 +36,11 @@ namespace Voting
             }
 
             return result;
+        }
+
+        public void CallOnVoteEnd()
+        {
+            OnVoteEnd?.Invoke();
         }
     }
 }

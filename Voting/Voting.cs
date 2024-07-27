@@ -33,8 +33,12 @@ namespace Voting
 
         public static PluginCapability<IVotingAPI> APICapability = new("voting");
 
+        VotingAPI? API { get; set; }
+
         public override void Load(bool hotReload)
         {
+            API = new VotingAPI(this);
+
             Capabilities.RegisterPluginCapability(APICapability, () => new VotingAPI(this));
 
             AddCommand("css_vote", "Create Vote for player", VoteCommand);
@@ -47,7 +51,7 @@ namespace Voting
         {
             if (IsVotingNow)
             {
-                info.ReplyToCommand($" {ChatColors.Green}[Voting] Vote is now in progress!");
+                info.ReplyToCommand($" {ChatColors.Green}[Voting] {ChatColors.White}Vote is now in progress!");
                 return;
             }
 
@@ -66,7 +70,7 @@ namespace Voting
 
             else
             {
-                for (int i = 2; i < info.ArgCount + 1; i++)
+                for (int i = 2; i < info.ArgCount; i++)
                 {
                     Choice.Add(info.GetArg(i));
                 }
@@ -80,18 +84,18 @@ namespace Voting
         {
             if (!IsVotingNow)
             {
-                info.ReplyToCommand($" {ChatColors.Green}[Voting] There is currently has no vote now!");
+                info.ReplyToCommand($" {ChatColors.Green}[Voting] {ChatColors.White}There is currently has no vote now!");
                 return;
             }
 
-            VoteEnd();
+            VoteEnd(true);
         }
 
         public void ReVoteCommand(CCSPlayerController? client, CommandInfo info)
         {
             if (!IsVotingNow)
             {
-                info.ReplyToCommand($" {ChatColors.Green}[Voting] There is currently has no vote now!");
+                info.ReplyToCommand($" {ChatColors.Green}[Voting] {ChatColors.White}There is currently has no vote now!");
                 return;
             }
 
@@ -109,6 +113,7 @@ namespace Voting
                 if (data.Value.Voter.Contains(client))
                 {
                     data.Value.Voter.Remove(client);
+                    data.Value.VoteCount--;
                     break;
                 }
             }
@@ -116,7 +121,7 @@ namespace Voting
             CreateVoteMenu(client);
         }
 
-        public void VoteStart()
+        public void VoteStart(int duration = 20)
         {
             if (IsVotingNow)
             {
@@ -126,6 +131,8 @@ namespace Voting
 
             IsVotingNow = true;
 
+            RegisterListener<Listeners.OnTick>(OnGameFrame);
+
             _voteData.Clear();
             _clientChoice.Clear();
 
@@ -134,9 +141,9 @@ namespace Voting
                 _voteData.Add(Choice[i], new());
             }
 
-            _timer = AddTimer(20f, () => VoteEnd());
+            _timer = AddTimer(duration, () => VoteEnd());
 
-            _countdown = 20;
+            _countdown = duration;
 
             _countdownTimer = AddTimer(1f, () => {
 
@@ -159,11 +166,11 @@ namespace Voting
 
         public void CreateVoteMenu(CCSPlayerController client)
         {
-            var menu = new ChatMenu($" {ChatColors.Green}======== New Vote ========" + "\n" + ChatColors.White + Question);
+            var menu = new ChatMenu($" {ChatColors.Green}======== New Vote ======== \n" + ChatColors.White + Question);
 
             for (int i = 0; i < Choice.Count; i++)
             {
-                menu.AddMenuOption(Choice[1], CreateVoteMenuHandler);
+                menu.AddMenuOption(Choice[i], CreateVoteMenuHandler);
             }
 
             MenuManager.OpenChatMenu(client, menu);
@@ -199,7 +206,7 @@ namespace Voting
 
         public void ShowVoteProgress()
         {
-            var message = $"Voting in Progress ({_countdown} Secs left.)" + "\n";
+            var message = $"Voting in Progress ({_countdown} Secs left.)";
 
             var item = 3;
 
@@ -213,7 +220,7 @@ namespace Voting
 
             foreach (var entry in topVote)
             {
-                message += $"{entry.Key} ({entry.Value})" + "\n";
+                message += $"<br>{entry.Key} - ({entry.Value})";
             }
 
             foreach (var client in Utilities.GetPlayers())
@@ -223,22 +230,22 @@ namespace Voting
                     ShowClientChoice(client);
                 }
 
-                client.PrintToCenter(message);
+                client.PrintToCenterHtml(message);
             }
         }
 
         public void ShowClientChoice(CCSPlayerController client)
         {
-            var message = "Vote Now!" + "\n";
+            var message = "Vote Now!";
             int choice = 1;
 
             foreach (var option in _voteData)
             {
-                message += $"!{choice} " + option.Key + $" [{option.Value.VoteCount}]";
+                message += $"<br>!{choice} " + option.Key + $" [{option.Value.VoteCount}]";
                 choice++;
             }
 
-            client.PrintToCenter(message);
+            client.PrintToCenterHtml(message);
         }
 
         public void VoteEnd(bool cancel = false)
@@ -257,13 +264,15 @@ namespace Voting
                 _timer.Kill();
             }
 
-            if(cancel)
+            if (cancel)
             {
                 Server.PrintToChatAll($" {ChatColors.Green}[Voting]{ChatColors.White} Current vote has been cancelled.");
                 return;
             }
 
-            Server.PrintToChatAll($" {ChatColors.Green}[Voting] The {Winner} is winning with {WinnerVote} votes!");
+            API!.CallOnVoteEnd();
+
+            Server.PrintToChatAll($" {ChatColors.Green}[Voting] {ChatColors.Olive}{Winner} {ChatColors.White}is winning with {ChatColors.Olive}{WinnerVote} {ChatColors.White}votes!");
         }
     }
 }
