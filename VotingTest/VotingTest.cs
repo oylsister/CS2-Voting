@@ -27,6 +27,8 @@ namespace VotingTest
         public override void OnAllPluginsLoaded(bool hotReload)
         {
             VotingAPI = Capability.Get()!;
+
+            VotingAPI.OnVoteEnd += OnVoteEnd;
         }
 
         public void MapVoteCommand(CCSPlayerController? client, CommandInfo info)
@@ -37,16 +39,17 @@ namespace VotingTest
             _maps.Add("ze_icecap_escape_p");
             _maps.Add("cs_office");
 
-            VotingAPI!.CreateVote("Vote Next Map", _maps, 45);
+            VotingAPI!.CreateVote("Vote Next Map", _maps, 20);
+        }
 
-            AddTimer(46f, () => {
-                var votelist = VotingAPI.GetVoteResult();
+        public void OnVoteEnd()
+        {
+            var votelist = VotingAPI!.GetVoteResult();
 
-                foreach (var map in votelist)
-                {
-                    Server.PrintToChatAll($"{map.Key} get {map.Value}");
-                }
-            });
+            foreach (var map in votelist)
+            {
+                Server.PrintToChatAll($"{map.Key} get {map.Value}");
+            }
         }
     }
 }

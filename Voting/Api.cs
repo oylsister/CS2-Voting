@@ -38,6 +38,11 @@ namespace Voting
             return result;
         }
 
+        public bool IsVoteInProgress()
+        {
+            return _plugin.IsVotingNow;
+        }
+
         public void CallOnVoteEnd()
         {
             OnVoteEnd?.Invoke();

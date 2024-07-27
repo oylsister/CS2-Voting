@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Xml.Schema;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Capabilities;
 using CounterStrikeSharp.API.Modules.Admin;
@@ -33,13 +34,13 @@ namespace Voting
 
         public static PluginCapability<IVotingAPI> APICapability = new("voting");
 
-        VotingAPI? API { get; set; }
+        VotingAPI? API { get; set; } = null!;
 
         public override void Load(bool hotReload)
         {
             API = new VotingAPI(this);
 
-            Capabilities.RegisterPluginCapability(APICapability, () => new VotingAPI(this));
+            Capabilities.RegisterPluginCapability(APICapability, () => API);
 
             AddCommand("css_vote", "Create Vote for player", VoteCommand);
             AddCommand("css_revote", "Revote Command", ReVoteCommand);
