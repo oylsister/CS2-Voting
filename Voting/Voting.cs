@@ -172,7 +172,8 @@ namespace Voting
 
         public void CreateVoteMenu(CCSPlayerController client)
         {
-            var menu = new ChatMenu($" {ChatColors.Green}======== New Vote ======== \n" + ChatColors.White + Question);
+            Server.PrintToChatAll($" {ChatColors.Green}======== New Vote ========");
+            var menu = new ChatMenu($" Vote: {Question}");
 
             for (int i = 0; i < Choice.Count; i++)
             {
