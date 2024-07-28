@@ -16,7 +16,7 @@ namespace Voting
     {
         public override string ModuleName => "Voting Module";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.0";
+        public override string ModuleVersion => "1.1";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
         public bool IsVotingNow = false;
@@ -139,6 +139,11 @@ namespace Voting
 
             for (int i = 0; i < Choice.Count; i++)
             {
+                if (_voteData.ContainsKey(Choice[i]))
+                {
+                    Server.PrintToChatAll($" {ChatColors.Green}[Voting]{ChatColors.White} The vote is cancelled because there is a duplicated answers in votes!");
+                    break;
+                }
                 _voteData.Add(Choice[i], new());
             }
 
@@ -226,12 +231,11 @@ namespace Voting
 
             foreach (var client in Utilities.GetPlayers())
             {
-                if (_clientChoice.ContainsKey(client) && _clientChoice[client] == string.Empty)
-                {
+                if (!_clientChoice.ContainsKey(client) && (_clientChoice[client] == string.Empty || !_clientChoice.ContainsKey(client)))
                     ShowClientChoice(client);
-                }
 
-                client.PrintToCenterHtml(message);
+                else 
+                    client.PrintToCenterHtml(message);
             }
         }
 
