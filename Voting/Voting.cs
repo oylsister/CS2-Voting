@@ -16,7 +16,7 @@ namespace Voting
     {
         public override string ModuleName => "Voting Module";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.1";
+        public override string ModuleVersion => "1.2";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
         public bool IsVotingNow = false;
@@ -172,8 +172,7 @@ namespace Voting
 
         public void CreateVoteMenu(CCSPlayerController client)
         {
-            Server.PrintToChatAll($" {ChatColors.Green}======== New Vote ========");
-            var menu = new ChatMenu($" Vote: {Question}");
+            var menu = new ChatMenu($"{ChatColors.Green}**** {ChatColors.White}Vote: {Question} {ChatColors.Green}****");
 
             for (int i = 0; i < Choice.Count; i++)
             {
@@ -213,7 +212,7 @@ namespace Voting
 
         public void ShowVoteProgress()
         {
-            var message = $"Voting in Progress ({_countdown} Secs left.)";
+            var message = $"Q: {Question}<br>Voting in Progress ({_countdown} Secs left.)";
 
             var item = 3;
 
@@ -242,7 +241,7 @@ namespace Voting
 
         public void ShowClientChoice(CCSPlayerController client)
         {
-            var message = "Vote Now!";
+            var message = $"Q: {Question}<br>Vote Now!";
             int choice = 1;
 
             foreach (var option in _voteData)
