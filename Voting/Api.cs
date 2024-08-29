@@ -13,10 +13,11 @@ namespace Voting
 
         public event Action? OnVoteEnd;
 
-        public void CreateVote(string question, List<string> chioce, int duration)
+        public void CreateVote(string question, List<string> chioce, int duration, bool cancellable = true)
         {
             _plugin.Question = question;
             _plugin.Choice = chioce;
+            _plugin.Cancellable = cancellable;
 
             _plugin.VoteStart(duration);
         }

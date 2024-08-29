@@ -16,7 +16,7 @@ namespace Voting
     {
         public override string ModuleName => "Voting Module";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.2";
+        public override string ModuleVersion => "1.3";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
         public bool IsVotingNow = false;
@@ -25,6 +25,7 @@ namespace Voting
 
         public string Question = null!;
         public List<string> Choice = null!;
+        public bool Cancellable = true;
         public string Winner = null!;
         public int WinnerVote;
 
@@ -89,6 +90,12 @@ namespace Voting
                 return;
             }
 
+            if (!Cancellable)
+            {
+                info.ReplyToCommand($" {ChatColors.Green}[Voting] {ChatColors.White}This vote is not cancellable!");
+                return;
+            }
+
             VoteEnd(true);
         }
 
@@ -122,13 +129,15 @@ namespace Voting
             CreateVoteMenu(client);
         }
 
-        public void VoteStart(int duration = 20)
+        public void VoteStart(int duration = 20, bool cancellable = true)
         {
             if (IsVotingNow)
             {
                 Logger.LogError("Cannot start vote because there is already a vote in progress!");
                 return;
             }
+
+            Cancellable = cancellable;
 
             IsVotingNow = true;
 
@@ -231,17 +240,25 @@ namespace Voting
 
             foreach (var client in Utilities.GetPlayers())
             {
-                if (!_clientChoice.ContainsKey(client) && (_clientChoice[client] == string.Empty || !_clientChoice.ContainsKey(client)))
-                    ShowClientChoice(client);
+                if (_clientChoice.ContainsKey(client))
+                {
+                    if (_clientChoice[client] == string.Empty || string.IsNullOrEmpty(_clientChoice[client]) || string.IsNullOrWhiteSpace(_clientChoice[client]))
+                        ShowClientChoice(client);
 
-                else 
+                    else
+                    {
+                        message += $"<br><font size=\"4\">You have voted: {_clientChoice[client]}</font>";
+                        client.PrintToCenterHtml(message);
+                    }  
+                }
+                else
                     client.PrintToCenterHtml(message);
             }
         }
 
         public void ShowClientChoice(CCSPlayerController client)
         {
-            var message = $"Q: {Question}<br>Vote Now!";
+            var message = $"Vote Now! ({_countdown} Secs left.)";
             int choice = 1;
 
             foreach (var option in _voteData)
@@ -256,6 +273,7 @@ namespace Voting
         public void VoteEnd(bool cancel = false)
         {
             IsVotingNow = false;
+            Cancellable = true;
 
             RemoveListener<Listeners.OnTick>(OnGameFrame);
 

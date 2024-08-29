@@ -10,7 +10,7 @@ namespace VotingTest
     {
         public override string ModuleName => "Voting Test";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.0";
+        public override string ModuleVersion => "1.1";
         public override string ModuleDescription => "Testing VotingAPI";
 
         public List<string> _maps = new List<string>();
@@ -27,7 +27,6 @@ namespace VotingTest
         public override void OnAllPluginsLoaded(bool hotReload)
         {
             VotingAPI = Capability.Get()!;
-
             VotingAPI.OnVoteEnd += OnVoteEnd;
         }
 
@@ -40,11 +39,25 @@ namespace VotingTest
             _maps.Add("cs_office");
 
             VotingAPI!.CreateVote("Vote Next Map", _maps, 20);
+
+            /*
+            AddTimer(46f, () => {
+                var votelist = VotingAPI.GetVoteResult();
+
+                foreach (var map in votelist)
+                {
+                    Server.PrintToChatAll($"{map.Key} get {map.Value}");
+                }
+            });
+            */
         }
 
         public void OnVoteEnd()
         {
-            var votelist = VotingAPI!.GetVoteResult();
+            if (VotingAPI == null)
+                return;
+
+            var votelist = VotingAPI.GetVoteResult();
 
             foreach (var map in votelist)
             {
