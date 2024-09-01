@@ -258,7 +258,7 @@ namespace Voting
 
         public void ShowClientChoice(CCSPlayerController client)
         {
-            var message = $"Vote Now! ({_countdown} Secs left.)";
+            var message = $"Q: {Question}<br>Vote Now! ({_countdown} Secs left.)";
             int choice = 1;
 
             foreach (var option in _voteData)
