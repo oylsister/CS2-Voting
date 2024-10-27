@@ -7,13 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VotingAPI\VotingAPI.csproj" />
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.284" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="CounterStrikeSharp.API">
-      <HintPath>api\CounterStrikeSharp.API.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\VotingAPI\VotingAPI.csproj" />
   </ItemGroup>
-
 </Project>
