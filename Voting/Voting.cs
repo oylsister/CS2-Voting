@@ -16,7 +16,7 @@ namespace Voting
     {
         public override string ModuleName => "Voting Module";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.3";
+        public override string ModuleVersion => "1.4";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
         public bool IsVotingNow = false;
@@ -247,8 +247,8 @@ namespace Voting
 
                     else
                     {
-                        message += $"<br><font size=\"4\">You have voted: {_clientChoice[client]}</font>";
-                        client.PrintToCenterHtml(message);
+                        var newMessage = $"{message} <br><font size=\"4\">You have voted: {_clientChoice[client]}</font>";
+                        client.PrintToCenterHtml(newMessage);
                     }  
                 }
                 else
