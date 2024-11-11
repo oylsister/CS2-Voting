@@ -16,7 +16,7 @@ namespace Voting
     {
         public override string ModuleName => "Voting Module";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.4";
+        public override string ModuleVersion => "1.5";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
         public bool IsVotingNow = false;
@@ -198,6 +198,7 @@ namespace Voting
             if(!IsVotingNow)
             {
                 client.PrintToChat($" {ChatColors.Green}[Voting]{ChatColors.White} There is no vote in progress now!");
+                MenuManager.CloseActiveMenu(client);
                 return;
             }
 
@@ -208,6 +209,7 @@ namespace Voting
                 _clientChoice[client] = option.Text;
 
                 client.PrintToChat($" {ChatColors.Green}[Voting]{ChatColors.White} You have vote for {ChatColors.Olive}{option.Text}");
+                MenuManager.CloseActiveMenu(client);
             }
         }
 
