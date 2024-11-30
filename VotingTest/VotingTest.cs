@@ -38,7 +38,7 @@ namespace VotingTest
             _maps.Add("ze_icecap_escape_p");
             _maps.Add("cs_office");
 
-            VotingAPI!.CreateVote("Vote Next Map", _maps, 20);
+            VotingAPI?.CreateVote("Vote Next Map", _maps, 20, true, false);
 
             /*
             AddTimer(46f, () => {
@@ -52,10 +52,12 @@ namespace VotingTest
             */
         }
 
-        public void OnVoteEnd()
+        public void OnVoteEnd(string winner)
         {
             if (VotingAPI == null)
                 return;
+
+            Server.PrintToChatAll($"Winner is {winner}");
 
             var votelist = VotingAPI.GetVoteResult();
 

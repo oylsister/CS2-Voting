@@ -19,14 +19,16 @@ namespace Voting
         public override string ModuleVersion => "1.5";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
+        private readonly ILogger<Voting> _logger;
+
         public bool IsVotingNow = false;
         public Dictionary<string, VoteData> _voteData = new Dictionary<string, VoteData>();
         public Dictionary<CCSPlayerController, string> _clientChoice = new Dictionary<CCSPlayerController, string>();
 
-        public string Question = null!;
-        public List<string> Choice = null!;
+        public string? Question = null;
+        public List<string>? Choice = null;
         public bool Cancellable = true;
-        public string Winner = null!;
+        public string? Winner = null;
         public int WinnerVote;
 
         public CounterStrikeSharp.API.Modules.Timers.Timer? _timer;
@@ -35,7 +37,7 @@ namespace Voting
 
         public static PluginCapability<IVotingAPI> APICapability = new("voting");
 
-        VotingAPI? API { get; set; } = null!;
+        VotingAPI? API { get; set; } = null;
 
         public override void Load(bool hotReload)
         {
@@ -46,6 +48,11 @@ namespace Voting
             AddCommand("css_vote", "Create Vote for player", VoteCommand);
             AddCommand("css_revote", "Revote Command", ReVoteCommand);
             AddCommand("css_cancelvote", "Cancel Vote Command", CancelVoteCommand);
+        }
+
+        public Voting(ILogger<Voting> logger)
+        {
+            _logger = logger;
         }
 
         [RequiresPermissions("@css/vote")]
@@ -129,11 +136,11 @@ namespace Voting
             CreateVoteMenu(client);
         }
 
-        public void VoteStart(int duration = 20, bool cancellable = true)
+        public void VoteStart(int duration = 20, bool cancellable = true, bool announceWinner = true)
         {
             if (IsVotingNow)
             {
-                Logger.LogError("Cannot start vote because there is already a vote in progress!");
+                _logger.LogError("Cannot start vote because there is already a vote in progress!");
                 return;
             }
 
@@ -146,7 +153,7 @@ namespace Voting
             _voteData.Clear();
             _clientChoice.Clear();
 
-            for (int i = 0; i < Choice.Count; i++)
+            for (int i = 0; i < Choice?.Count; i++)
             {
                 if (_voteData.ContainsKey(Choice[i]))
                 {
@@ -156,7 +163,7 @@ namespace Voting
                 _voteData.Add(Choice[i], new());
             }
 
-            _timer = AddTimer(duration, () => VoteEnd());
+            _timer = AddTimer(duration, () => VoteEnd(false, announceWinner));
 
             _countdown = duration;
 
@@ -183,7 +190,7 @@ namespace Voting
         {
             var menu = new ChatMenu($"{ChatColors.Green}**** {ChatColors.White}Vote: {Question} {ChatColors.Green}****");
 
-            for (int i = 0; i < Choice.Count; i++)
+            for (int i = 0; i < Choice?.Count; i++)
             {
                 menu.AddMenuOption(Choice[i], CreateVoteMenuHandler);
             }
@@ -272,7 +279,7 @@ namespace Voting
             client.PrintToCenterHtml(message);
         }
 
-        public void VoteEnd(bool cancel = false)
+        public void VoteEnd(bool cancel = false, bool announce = true)
         {
             IsVotingNow = false;
             Cancellable = true;
@@ -295,9 +302,16 @@ namespace Voting
                 return;
             }
 
-            API!.CallOnVoteEnd();
+            if(Winner == null || string.IsNullOrEmpty(Winner))
+            {
+                _logger.LogError("Winner turn out to be null");
+                return;
+            }
 
-            Server.PrintToChatAll($" {ChatColors.Green}[Voting] {ChatColors.Olive}{Winner} {ChatColors.White}is winning with {ChatColors.Olive}{WinnerVote} {ChatColors.White}votes!");
+            API?.CallOnVoteEnd(Winner);
+            
+            if(announce)
+                Server.PrintToChatAll($" {ChatColors.Green}[Voting] {ChatColors.Olive}{Winner} {ChatColors.White}is winning with {ChatColors.Olive}{WinnerVote} {ChatColors.White}votes!");
         }
     }
 }

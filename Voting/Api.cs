@@ -1,4 +1,5 @@
-﻿using VotingAPI;
+﻿using CounterStrikeSharp.API.Core;
+using VotingAPI;
 
 namespace Voting
 {
@@ -11,15 +12,14 @@ namespace Voting
             _plugin = plugin; 
         }
 
-        public event Action? OnVoteEnd;
+        public event Action<string>? OnVoteEnd;
 
-        public void CreateVote(string question, List<string> chioce, int duration, bool cancellable = true)
+        public void CreateVote(string question, List<string> chioce, int duration, bool cancellable = true, bool announceWinner = true)
         {
             _plugin.Question = question;
             _plugin.Choice = chioce;
-            _plugin.Cancellable = cancellable;
 
-            _plugin.VoteStart(duration);
+            _plugin.VoteStart(duration, cancellable, announceWinner);
         }
 
         public void CancelVote()
@@ -44,9 +44,9 @@ namespace Voting
             return _plugin.IsVotingNow;
         }
 
-        public void CallOnVoteEnd()
+        public void CallOnVoteEnd(string winner)
         {
-            OnVoteEnd?.Invoke();
+            OnVoteEnd?.Invoke(winner);
         }
     }
 }
