@@ -230,7 +230,7 @@ namespace Voting
 
         public void ShowVoteProgress()
         {
-            var message = $"Q: {Question}<br>Voting in Progress ({_countdown} Secs left.)";
+            var message = $"<font color='yellow'>Q</font>: {Question}<br>Voting in Progress (<font color='red'>{_countdown}</font> Secs left.)";
 
             var item = 3;
 
@@ -244,7 +244,7 @@ namespace Voting
 
             foreach (var entry in topVote)
             {
-                message += $"<br>{entry.Key} - ({entry.Value})";
+                message += $"<br>{entry.Key} - <font color='yellow'>({entry.Value})</font>";
             }
 
             foreach (var client in Utilities.GetPlayers())
@@ -256,7 +256,7 @@ namespace Voting
 
                     else
                     {
-                        var newMessage = $"{message} <br><font size=\"4\">You have voted: {_clientChoice[client]}</font>";
+                        var newMessage = $"{message} <br><font size=\"4\">You have voted: <span><font color='green'>{_clientChoice[client]}</font></span></font>";
                         client.PrintToCenterHtml(newMessage);
                     }  
                 }
@@ -267,12 +267,12 @@ namespace Voting
 
         public void ShowClientChoice(CCSPlayerController client)
         {
-            var message = $"Q: {Question}<br>Vote Now! ({_countdown} Secs left.)";
+            var message = $"<font color='yellow'>Q</font>: {Question}<br>Vote Now! (<font color='red'>{_countdown}</font> Secs left.)";
             int choice = 1;
 
             foreach (var option in _voteData)
             {
-                message += $"<br>!{choice} " + option.Key + $" [{option.Value.VoteCount}]";
+                message += $"<br><font color='green'>!{choice}</font> " + option.Key + $" <font color='yellow'>[{option.Value.VoteCount}]</font>";
                 choice++;
             }
 
