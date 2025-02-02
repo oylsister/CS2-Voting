@@ -12,11 +12,11 @@ using VotingAPI;
 
 namespace Voting
 {
-    public class Voting : BasePlugin
+    public class Voting : BasePlugin, IPluginConfig<Settings>
     {
         public override string ModuleName => "Voting Module";
         public override string ModuleAuthor => "Oylsister";
-        public override string ModuleVersion => "1.5";
+        public override string ModuleVersion => "1.6";
         public override string ModuleDescription => "Voting API for CounterStrikeSharp";
 
         private readonly ILogger<Voting> _logger;
@@ -37,6 +37,8 @@ namespace Voting
 
         public static PluginCapability<IVotingAPI> APICapability = new("voting");
 
+        public Settings Config { get; set; } = new();
+
         VotingAPI? API { get; set; } = null;
 
         public override void Load(bool hotReload)
@@ -48,6 +50,11 @@ namespace Voting
             AddCommand("css_vote", "Create Vote for player", VoteCommand);
             AddCommand("css_revote", "Revote Command", ReVoteCommand);
             AddCommand("css_cancelvote", "Cancel Vote Command", CancelVoteCommand);
+        }
+
+        public void OnConfigParsed(Settings config)
+        {
+            Config = config;
         }
 
         public Voting(ILogger<Voting> logger)
@@ -136,13 +143,16 @@ namespace Voting
             CreateVoteMenu(client);
         }
 
-        public void VoteStart(int duration = 20, bool cancellable = true, bool announceWinner = true)
+        public void VoteStart(int duration = 0, bool cancellable = true, bool announceWinner = true)
         {
             if (IsVotingNow)
             {
                 _logger.LogError("Cannot start vote because there is already a vote in progress!");
                 return;
             }
+
+            if (duration <= 0)
+                duration = (int)Config.DefaultDuration;
 
             Cancellable = cancellable;
 
